@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results – Oracle SQL Analysis</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- Logo -->
+    <div class="logo-container">
+        <img src="/static/logo.png" class="logo">
+    </div>
+
+    <!-- Title -->
+    <h1>Query Results</h1>
+    <h2>Your SQL Command Output</h2>
+
+    <!-- Results Box -->
+    <div class="results-box">
+        <h3>Output Table</h3>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        {% for col in columns %}
+                        <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        {% for value in row %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="button-container">
+        <a href="/charts" class="nav-btn">View Charts</a>
+        <a href="/table_view" class="nav-btn">View Table Only</a>
+    </div>
+
+</body>
+</html>
+

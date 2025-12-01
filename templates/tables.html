@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Table View</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- Logo -->
+    <div class="logo-container">
+        <img src="/static/logo.png" class="logo">
+    </div>
+
+    <!-- Title -->
+    <h1>Table View</h1>
+    <h2>SQL Query Output in Tabular Form</h2>
+
+    <!-- Table Box -->
+    <div class="results-box">
+        <h3>Query Result Table</h3>
+
+        {% if rows %}
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    {% for col in columns %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    {% for item in row %}
+                    <td>{{ item }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No rows returned.</p>
+        {% endif %}
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="button-container">
+        <a href="/results" class="nav-btn">Back to Results</a>
+        <a href="/charts" class="nav-btn">View Charts</a>
+    </div>
+
+</body>
+</html>
+

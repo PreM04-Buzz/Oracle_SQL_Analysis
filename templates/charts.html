@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Charts – Oracle SQL Analysis</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Logo -->
+    <div class="logo-container">
+        <img src="/static/logo.png" class="logo">
+    </div>
+
+    <!-- Title -->
+    <h1>Charts</h1>
+    <h2>Visual Representation of Your SQL Data</h2>
+
+    <!-- Chart Box -->
+    <div class="results-box">
+        <h3>Generated Chart</h3>
+        <canvas id="dataChart"></canvas>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="button-container">
+        <a href="/results" class="nav-btn">Back to Results</a>
+        <a href="/table_view" class="nav-btn">View Table</a>
+    </div>
+
+    <script>
+        const columns = {{ columns | tojson }};
+        const data = {{ rows | tojson }};
+
+        // Convert rows into graph-friendly format  
+        const labels = data.map(row => row[0]);
+        const values = data.map(row => Number(row[1]));
+
+        const ctx = document.getElementById('dataChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',  // can be 'line', 'scatter', etc.
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Data Values',
+                    data: values,
+                    backgroundColor: '#007bff',
+                    borderColor: '#003b8a',
+                    borderWidth: 2
+                }]
+            },
+
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
+

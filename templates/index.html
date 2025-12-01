@@ -1,0 +1,42 @@
+k<!DOCTYPE html>
+<html>
+<head>
+    <title>Project 02 – Analysis for Data using Oracle SQL</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- Logo -->
+    <div class="logo-container">
+        <img src="/static/logo.png" class="logo">
+    </div>
+
+    <!-- Title -->
+    <h1>Project 02</h1>
+    <h2>Analysis for Data using Oracle SQL</h2>
+
+    <!-- Upload Box -->
+    <div class="upload-box">
+        <h3>Upload CSV or XLSX File</h3>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv, .xlsx" required><br>
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+    <!-- SQL Command Box -->
+    {% if file_uploaded %}
+    <div class="command-box">
+        <h3>Enter SQL Command</h3>
+        <form action="/run_sql" method="POST">
+            <textarea name="sql_command" placeholder="SELECT * FROM table_name;" required></textarea>
+            <button type="submit" class="start-btn">Start</button>
+        </form>
+    </div>
+    {% endif %}
+
+</body>
+</html>
+
