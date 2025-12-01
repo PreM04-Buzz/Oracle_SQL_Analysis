@@ -1,12 +1,11 @@
 from flask import Flask, render_template, request, redirect
 import pandas as pd
-import sqlite3
+from db_config import get_oracle_connection
 
 app = Flask(__name__)
 
 uploaded_df = None
 sql_result_df = None
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -15,6 +14,7 @@ def index():
 
     if request.method == "POST":
         file = request.files.get("file")
+
         if file:
             name = file.filename.lower()
             if name.endswith(".csv"):
@@ -22,7 +22,7 @@ def index():
             elif name.endswith(".xlsx"):
                 uploaded_df = pd.read_excel(file)
             else:
-                return "Unsupported file format"
+                return "Unsupported file format."
             file_uploaded = True
 
     return render_template("index.html", file_uploaded=file_uploaded)
@@ -38,17 +38,42 @@ def run_sql():
     query = request.form.get("sql_command")
 
     try:
-        conn = sqlite3.connect(":memory:")
-        uploaded_df.to_sql("DATASET", conn, index=False, if_exists="replace")
-        sql_result_df = pd.read_sql_query(query, conn)
+        conn = get_oracle_connection()
+        if conn is None:
+            return "Database connection failed."
+
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("DROP TABLE DATASET PURGE")
+        except:
+            pass
+
+        column_defs = ", ".join([f'"{col}" VARCHAR2(200)' for col in uploaded_df.columns])
+        cursor.execute(f"CREATE TABLE DATASET ({column_defs})")
+
+        for _, row in uploaded_df.iterrows():
+            placeholders = ", ".join([":"+str(i+1) for i in range(len(row))])
+            cursor.execute(
+                f"INSERT INTO DATASET VALUES ({placeholders})",
+                row.tolist()
+            )
+
+        conn.commit()
+
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        columns = [col[0] for col in cursor.description]
+
+        sql_result_df = pd.DataFrame(rows, columns=columns)
+
+        cursor.close()
         conn.close()
 
-        columns = list(sql_result_df.columns)
-        rows = sql_result_df.values.tolist()
-        return render_template("results.html", columns=columns, rows=rows)
+        return render_template("results.html", columns=columns, rows=rows, errorstr=None)
 
     except Exception as e:
-        return render_template("results.html", error=str(e), columns=[], rows=[])
+        return render_template("results.html", columns=[], rows=[], errorstr=str(e))
 
 
 @app.route("/charts")
@@ -62,7 +87,7 @@ def charts():
         labels = sql_result_df.iloc[:, 0].astype(str).tolist()
         values = sql_result_df.iloc[:, 1].astype(float).tolist()
     except:
-        return "First column must be labels and second column must be numeric."
+        return "First column must be labels and second numeric."
 
     return render_template(
         "charts.html",
@@ -80,10 +105,11 @@ def table_view():
     if sql_result_df is None:
         return "No table available."
 
-    columns = list(sql_result_df.columns)
-    rows = sql_result_df.values.tolist()
-
-    return render_template("tables.html", columns=columns, rows=rows)
+    return render_template(
+        "tables.html",
+        columns=list(sql_result_df.columns),
+        rows=sql_result_df.values.tolist()
+    )
 
 
 if __name__ == "__main__":
